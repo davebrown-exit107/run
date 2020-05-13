@@ -1,0 +1,32 @@
+##################################################
+# config file for run
+##################################################
+
+# make sure to change the secret key before deployment
+SECRET_KEY = '<SECRET_KEY_HERE>'
+DEBUG = True
+
+# SQLAlchemy
+#SQLALCHEMY_DATABASE_URI = 'postgresql://<USER>:<PASS>@localhost/<DB>'
+SQLALCHEMY_DATABASE_URI = 'sqlite:///run.db'
+
+# uwsgi
+PROPAGATE_EXCEPTIONS = True
+
+# ftp
+UPLOAD_DIR = '<UPLOAD_DIR>'
+
+# Celery
+CELERY_BROKER_URL = 'amqp://localhost//'
+CELERY_RESULT_BACKEND = 'amqp'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT=['json']
+CELERY_ENABLE_UTC = True
+
+# API Keys
+FORECAST_API_KEY='<API_KEY_HERE>'
+GOOGLE_API_KEY='<API_KEY_HERE>'
+WEATHERUNDERGROUND_API_KEY='<API_KEY_HERE>'
+OPEN_MAPQUEST_KEY='<API_KEY_HERE>'
+OWM_API_KEY='<API_KEY_HERE>'
