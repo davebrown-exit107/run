@@ -2,7 +2,7 @@ from sqlalchemy.orm import column_property
 from sqlalchemy import select, func
 
 from run import db
-from run.lib import convert_to_degrees, timestamp_to_datetime, elevation
+from run.lib import *
 
 class Point(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,9 +39,8 @@ class Point(db.Model):
         self.timestamp = timestamp_to_datetime(timestamp)
         # Leave in metric
         self.elevation = elevation
-        # Convert to degrees
-        self.latitude = convert_to_degrees(latitude)
-        self.longitude = convert_to_degrees(longitude)
+        self.latitude = latitude
+        self.longitude = longitude
         # Leave in metric
         self.distance = distance
         self.speed = speed
@@ -82,10 +81,10 @@ class Lap(db.Model):
                   total_distance, start_time, total_timer_time, total_elapsed_time, run):
         self.avg_speed = avg_speed
         self.max_speed = max_speed
-        self.start_position_lat = convert_to_degrees(start_position_lat)
-        self.start_position_lng = convert_to_degrees(start_position_lng)
-        self.end_position_lat = convert_to_degrees(end_position_lat)
-        self.end_position_lng = convert_to_degrees(end_position_lng)
+        self.start_position_lat = start_position_lat
+        self.start_position_lng = start_position_lng
+        self.end_position_lat = end_position_lat
+        self.end_position_lng = end_position_lng
         self.total_ascent = total_ascent
         self.total_descent = total_descent
         self.total_distance = total_distance
@@ -137,10 +136,10 @@ class Run(db.Model):
                   day, city, state, country, timezone):
         self.avg_speed = avg_speed
         self.max_speed = max_speed
-        self.start_position_lat = convert_to_degrees(start_position_lat)
-        self.start_position_lng = convert_to_degrees(start_position_lng)
-        self.end_position_lat = convert_to_degrees(end_position_lat)
-        self.end_position_lng = convert_to_degrees(end_position_lng)
+        self.start_position_lat = start_position_lat
+        self.start_position_lng = start_position_lng
+        self.end_position_lat = end_position_lat
+        self.end_position_lng = end_position_lng
         self.total_ascent = total_ascent
         self.total_descent = total_descent
         self.total_distance = total_distance
