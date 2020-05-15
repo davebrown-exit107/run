@@ -1,3 +1,4 @@
 *.db
 uploads
 run/config/*.conf
+__pycache__
