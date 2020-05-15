@@ -1,0 +1,93 @@
+digraph {
+    graph [pad="0.5", nodesep="0.5", ranksep="2"];
+    node [shape=plain]
+    rankdir=LR;
+
+
+Run [label=<
+<table border="0" cellborder="1" cellspacing="0">
+  <tr><td colspan="2"><b>Run</b></td></tr>
+  <tr><td port="#">Name</td><td>Type</td></tr>
+  <tr><td port="id">id</td><td>int</td></tr>
+  <tr><td port="#">start_datetime</td><td>datetime</td></tr>
+  <tr><td port="#">end_datetime</td><td>datetime</td></tr>
+  <tr><td colspan="2"><b><i>Dynamic Properties</i></b></td></tr>
+  <tr><td port="#">time_elapsed</td><td>int</td></tr>
+  <tr><td port="#">distance</td><td>float</td></tr>
+  <tr><td port="#">local_timezone</td><td>string</td></tr>
+  <tr><td port="#">state</td><td>State</td></tr>
+  <tr><td port="#">country</td><td>Country</td></tr>
+  <tr><td colspan="2"><b><i>Foreign Keys</i></b></td></tr>
+  <tr><td port="legs_fk">legs</td><td>Leg(s)</td></tr>
+  <tr><td port="city_fk">city</td><td>City</td></tr>
+
+</table>>];
+
+
+Leg [label=<
+<table border="0" cellborder="1" cellspacing="0">
+  <tr><td colspan="2"><b>Leg</b></td></tr>
+  <tr><td port="#">Name</td><td>Type</td></tr>
+  <tr><td port="id">id</td><td>int</td></tr>
+  <tr><td port="#">start_datetime</td><td>datetime</td></tr>
+  <tr><td port="#">end_datetime</td><td>datetime</td></tr>
+  <tr><td colspan="2"><b><i>Dynamic Properties</i></b></td></tr>
+  <tr><td port="#">time_elapsed</td><td>int</td></tr>
+  <tr><td port="#">distance</td><td>float</td></tr>
+  <tr><td colspan="2"><b><i>Foreign Keys</i></b></td></tr>
+  <tr><td port="point_fk">points</td><td>Point(s)</td></tr>
+</table>>];
+
+City [label=<
+<table border="0" cellborder="1" cellspacing="0">
+  <tr><td colspan="2"><b>City</b></td></tr>
+  <tr><td port="#">Name</td><td>Type</td></tr>
+  <tr><td port="id">id</td><td>int</td></tr>
+  <tr><td port="#">name</td><td>Name</td></tr>
+  <tr><td colspan="2"><b><i>Foreign Keys</i></b></td></tr>
+  <tr><td port="state_fk">state</td></tr>
+</table>>];
+
+
+State [label=<
+<table border="0" cellborder="1" cellspacing="0">
+  <tr><td colspan="2"><b>State</b></td></tr>
+  <tr><td port="#">Name</td><td>Type</td></tr>
+  <tr><td port="id">id</td><td>int</td></tr>
+  <tr><td port="#">name</td><td>Name</td></tr>
+  <tr><td colspan="2"><b><i>Foreign Keys</i></b></td></tr>
+  <tr><td port="country_fk">country</td><td>Country</td></tr>
+</table>>];
+
+
+Country [label=<
+<table border="0" cellborder="1" cellspacing="0">
+  <tr><td colspan="2"><b>Country</b></td></tr>
+  <tr><td port="#">Name</td><td>Type</td></tr>
+  <tr><td port="id">id</td><td>int</td></tr>
+  <tr><td port="#">name</td><td>Name</td></tr>
+</table>>];
+
+
+
+Point [label=<
+<table border="0" cellborder="1" cellspacing="0">
+  <tr><td colspan="2"><b>Point</b></td></tr>
+  <tr><td port="#">Name</td><td>Type</td></tr>
+  <tr><td port="id">id</td><td>int</td></tr>
+  <tr><td port="#">timestamp</td><td>datetime</td></tr>
+  <tr><td port="#">latitude</td><td>float</td></tr>
+  <tr><td port="#">longitude</td><td>float</td></tr>
+  <tr><td port="#">speed</td><td>float</td></tr>
+  <tr><td port="#">distance</td><td>float</td></tr>
+  <tr><td port="#">elevation</td><td>float</td></tr>
+  <tr><td colspan="2"><b><i>Dynamic Properties</i></b></td></tr>
+  <tr><td port="#">pace</td><td>int</td></tr>
+</table>>];
+
+Leg:point_fk -> Point:id;
+Run:legs_fk -> Leg:id;
+Run:city_fk -> City:id;
+City:state_fk -> State:id;
+State:country_fk -> Country:id;
+}

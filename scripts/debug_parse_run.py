@@ -28,8 +28,11 @@ sys.path.append(root_dir)
 ###########################################
 from run import run_app
 from run import db
-from run.lib import convert_to_degrees, find_timezone
+from run.lib import *
 
+##########################################
+# Open the file named on the command line
+###########################################
 #TODO: Move this to click
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('file', type=argparse.FileType('r'), nargs=1,
@@ -37,6 +40,9 @@ parser.add_argument('file', type=argparse.FileType('r'), nargs=1,
 
 args = parser.parse_args()
 
+##########################################
+# Parse the fit file
+###########################################
 with open(args.file[0].name, 'rb') as input_file:
   try:
     fitfile_processor = StandardUnitsDataProcessor()
