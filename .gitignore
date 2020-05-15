@@ -2,3 +2,4 @@
 uploads
 run/config/*.conf
 __pycache__
+sample_data/*
