@@ -14,7 +14,7 @@ from flask import request, session, abort, render_template, \
 
 from run import db
 from run import run_app
-from run.models import Timezone, Country, State, City, Day, Run, Race
+from run.models import Country, State, City, Run, Leg, Point
 
 ##################################################
 # Frontends

@@ -6,6 +6,7 @@ from run.lib import *
 
 class Point(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+
     timestamp = db.Column(db.DateTime, nullable=False)
 
     elevation = db.Column(db.Numeric)
@@ -75,18 +76,18 @@ class Leg(db.Model):
     run = db.relationship('Run', backref=db.backref('legs'))
 
 
-    def __init__(self, avg_speed, max_speed, start_position_lat, start_position_long,
-                  end_position_lat, end_position_long, total_ascent, total_descent,
-                  total_distance, start_datetime, end_datetime, total_timer_time, total_elapsed_time, run):
-        self.avg_speed = avg_speed
-        self.max_speed = max_speed
+    def __init__(self, start_position_lat, start_position_long, 
+                end_position_lat, end_position_long, start_datetime,
+                end_datetime, total_timer_time, total_elapsed_time, run):
+        #self.avg_speed = avg_speed
+        #self.max_speed = max_speed
         self.start_position_lat = start_position_lat
         self.start_position_lng = start_position_lng
         self.end_position_lat = end_position_lat
         self.end_position_lng = end_position_lng
-        self.total_ascent = total_ascent
-        self.total_descent = total_descent
-        self.total_distance = total_distance
+        #self.total_ascent = total_ascent
+        #self.total_descent = total_descent
+        #self.total_distance = total_distance
         self.start_datetime = pendulum.instance(start_datetime)
         self.end_datetime = pendulum.instance(end_datetime)
         self.total_timer_time = total_timer_time
