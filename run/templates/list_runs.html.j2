@@ -1,17 +1,18 @@
 {% extends "base.html.j2" %}
 {% block content %}
     <h1>Runs</h1>
-    <table>
+    <table class='table'>
         <thead>
             <tr>
-                <th>start time</th>
-                <th>end time</th>
-                <th>distance</th>
-                <th>avg speed</th>
-                <th>max speed</th>
-                <th>start lat/lng</th>
-                <th>end lat/lng</th>
-                <th>Number of Legs</th>
+                <th>id</th>
+                <th>date</th>
+                <th>time</th>
+                <th>distance (m)</th>
+                <th>avg speed (mph)</th>
+                <th>max speed (mph)</th>
+                <th>avg pace (min / mile)</th>
+                <th>max pace (min / mile)</th>
+                <th>number of legs</th>
                 <th>city</th>
                 <th>state</th>
             </tr>
@@ -19,15 +20,14 @@
         <tbody>
             {% for run in runs %}
             <tr>
-                <td>{{ run.start_datetime }}</td>
-                <td>{{ run.end_datetime }}</td>
-                <td>{{ run.distance }}</td>
-                <td>still figuring out</td>
-                <td>still figuring out</td>
-                <td>{{ run.start_position.latitude }}, 
-                    {{ run.start_position.longitude }}</td>
-                <td>{{ run.end_position.latitude }}, 
-                    {{ run.end_position.longitude }}</td>
+              <td><a href="{{ url_for('detail_run', run_id=run.id) }}">{{ run.id }}</a></td>
+                <td>{{ run.start_datetime.strftime('%Y-%m-%d') }}</td>
+                <td>{{ run.start_datetime .strftime('%H:%M')}}</td>
+                <td>{{ run.distance | round(2) }}</td>
+                <td>{{ run.avg_speed | round(2) }}</td>
+                <td>{{ run.max_speed | round(2) }}</td>
+                <td>{{ run.avg_pace }}</td>
+                <td>{{ run.max_pace }}</td>
                 <td>{{ run.legs | length }}</td>
                 <td>{{ run.city.name }}</td>
                 <td>{{ run.city.state.name }}</td>

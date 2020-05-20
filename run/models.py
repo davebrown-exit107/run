@@ -83,8 +83,6 @@ class Leg(db.Model):
     def centroid(self):
         latitude = db.session.query(func.avg(Point.latitude)).filter(Point.run_id == self.id).scalar()
         longitude = db.session.query(func.avg(Point.longitude)).filter(Point.run_id == self.id).scalar()
-        print(latitude)
-        print(longitude)
         return {
                 'latitude': latitude,
                 'longitude': longitude

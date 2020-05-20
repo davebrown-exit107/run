@@ -1,48 +1,58 @@
 {% extends "base.html.j2" %}
 {% block content %}
 <div id='runMap'></div>
-<div id="accordion">
-    <div class="card">
-        <div class="card-header" id="headingRunCard">
-            <h5 class="mb-0">
-                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseRunCard" aria-expanded="false" aria-controls="collapseRunCard">
-                    Run - {{ run.start_datetime }} - {{ run.city.name }}, {{ run.city.state.name }}
-                </button>
-            </h5>
-        </div>
-        <div id="collapseRunCard" class="collapse show" aria-labelledby="headingRunCard" data-parent="#accordion">
-            <div class="card-body">
-                <dl class='list-group'>
-                    <dt>start time</dt>
-                        <dd>{{ run.start_datetime }}</dd>
-                    <dt>end time</dt>
-                        <dd>{{ run.end_datetime }}</dd>
-                    <dt>distance</dt>
-                        <dd>{{ run.distance_in_miles }}</dd>
-                    <dt>avg speed</dt>
-                        <dd>{{ run.avg_speed }}</dd>
-                    <dt>max speed</dt>
-                        <dd>{{ run.max_speed }}</dd>
-                    <dt>avg pace</dt>
-                        <dd>{{ run.avg_pace }}</dd>
-                    <dt>max pace</dt>
-                        <dd>{{ run.max_pace }}</dd>
-                    <dt>start lat/lng</dt>
-                        <dd>{{ run.start_position.latitude }}, 
-                            {{ run.start_position.longitude }}</dd>
-                    <dt>end lat/lng</dt>
-                        <dd>{{ run.end_position.latitude }}, 
-                            {{ run.end_position.longitude }}</dd>
-                    <dt>Number of Legs</dt>
-                        <dd>{{ run.legs | length }}</dd>
-                    <dt>city</dt>
-                        <dd>{{ run.city.name }}</dd>
-                    <dt>state</dt>
-                        <dd>{{ run.city.state.name }}</dd>
-                </dl>
-            </div>
-        </div>
-    </div>
+<div class="row">
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>start time</dt>
+            <dd>{{ run.start_datetime }}</dd>
+        <dt>end time</dt>
+            <dd>{{ run.end_datetime }}</dd>
+    </dl>
+  </div>
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>distance (mi)</dt>
+            <dd>{{ run.distance_in_miles | round(2) }}</dd>
+    </dl>
+  </div>
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>avg speed (mph)</dt>
+            <dd>{{ run.avg_speed | round(2) }}</dd>
+        <dt>max speed (mph)</dt>
+            <dd>{{ run.max_speed | round(2) }}</dd>
+        <dt>avg pace (min / mile)</dt>
+            <dd>{{ run.avg_pace }}</dd>
+        <dt>max pace (min / mile)</dt>
+            <dd>{{ run.max_pace }}</dd>
+    </dl>
+  </div>
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>start lat/lng</dt>
+            <dd>{{ run.start_position.latitude | round(5) }}, 
+                {{ run.start_position.longitude | round(5) }}</dd>
+        <dt>end lat/lng</dt>
+            <dd>{{ run.end_position.latitude | round(5) }}, 
+                {{ run.end_position.longitude | round(5) }}</dd>
+    </dl>
+  </div>
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>city</dt>
+            <dd>{{ run.city.name }}</dd>
+        <dt>state</dt>
+            <dd>{{ run.city.state.name }}</dd>
+    </dl>
+  </div>
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>Number of Legs</dt>
+            <dd>{{ run.legs | length }}</dd>
+    </dl>
+  </div>
+<div id="accordion" class="col-12">
     <div class="card">
         <div class="card-header" id="headingLegCard">
             <h5 class="mb-0">
@@ -59,10 +69,10 @@
                             <th scope="col">start time</th>
                             <th scope="col">end time</th>
                             <th scope="col">distance</th>
-                            <th scope="col">avg speed</th>
-                            <th scope="col">max speed</th>
-                            <th scope="col">avg pace</th>
-                            <th scope="col">max pace</th>
+                            <th scope="col">avg speed (mph)</th>
+                            <th scope="col">max speed (mph)</th>
+                            <th scope="col">avg pace (min / mile)</th>
+                            <th scope="col">max pace (min / mile)</th>
                             <th scope="col">start lat/lng</th>
                             <th scope="col">end lat/lng</th>
                             <th scope="col">number of points</th>
@@ -73,15 +83,15 @@
                         <tr>
                             <td>{{ leg.start_datetime }}</td>
                             <td>{{ leg.end_datetime }}</td>
-                            <td>{{ leg.distance_in_miles }}</td>
-                            <td>{{ leg.avg_speed }}</td>
-                            <td>{{ leg.max_speed }}</td>
+                            <td>{{ leg.distance_in_miles | round(2) }}</td>
+                            <td>{{ leg.avg_speed | round(2) }}</td>
+                            <td>{{ leg.max_speed | round(2) }}</td>
                             <td>{{ leg.avg_pace }}</td>
                             <td>{{ leg.max_pace }}</td>
-                            <td>{{ leg.start_position.latitude }}, 
-                                {{ leg.start_position.longitude }}</td>
-                            <td>{{ leg.end_position.latitude }}, 
-                                {{ leg.end_position.longitude }}</td>
+                            <td>{{ leg.start_position.latitude | round(5) }}, 
+                                {{ leg.start_position.longitude | round(5) }}</td>
+                            <td>{{ leg.end_position.latitude | round(5) }}, 
+                                {{ leg.end_position.longitude | round(5) }}</td>
                             <td>{{ leg.points | length }}</td>
                         </tr>
                         {% endfor %}
@@ -106,8 +116,8 @@
                             <th scope="col">timestamp</th>
                             <th scope="col">latitude</th>
                             <th scope="col">longitude</th>
-                            <th scope="col">speed</th>
-                            <th scope="col">pace</th>
+                            <th scope="col">speed (mph)</th>
+                            <th scope="col">pace (min / mile)</th>
                             <th scope="col">elevation</th>
                         </tr>
                     </thead>
@@ -115,11 +125,11 @@
                         {% for point in run.points %}
                             <tr>
                                 <td>{{ point.timestamp }}</td>
-                                <td>{{ point.latitude }}</td>
-                                <td>{{ point.longitude }}</td>
-                                <td>{{ point.speed_in_mph }}</td>
+                                <td>{{ point.latitude | round(5) }}</td>
+                                <td>{{ point.longitude | round(5) }}</td>
+                                <td>{{ point.speed_in_mph | round(2) }}</td>
                                 <td>{{ point.pace }}</td>
-                                <td>{{ point.elevation }}</td>
+                                <td>{{ point.elevation | round(2) }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
