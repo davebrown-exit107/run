@@ -19,23 +19,28 @@ def landing_page():
     return 'landing_page'
 
 
-@run_app.route('/point/list', methods=['GET'])
+@run_app.route('/point/', methods=['GET'])
 def list_points():
     points = db.session.query(Point).all()
     return render_template('list_points.html.j2', points=points)
 
 
-@run_app.route('/run/list', methods=['GET'])
+@run_app.route('/run/', methods=['GET'])
 def list_runs():
     runs = db.session.query(Run).all()
     return render_template('list_runs.html.j2', runs=runs)
 
 
-@run_app.route('/leg/list', methods=['GET'])
+@run_app.route('/leg/', methods=['GET'])
 def list_legs():
     legs = db.session.query(Leg).all()
     return render_template('list_legs.html.j2', legs=legs)
 
+
+@run_app.route('/leg/<int:leg_id>', methods=['GET'])
+def detail_leg(leg_id):
+    leg = db.session.query(Leg).get_or_404(leg_id)
+    return render_template('detail_leg.html.j2', leg=leg, MAPBOX_API_KEY=run_app.config['MAPBOX_API_KEY'])
 
 @run_app.route('/run/<int:run_id>', methods=['GET'])
 def detail_run(run_id):

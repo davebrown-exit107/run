@@ -1,0 +1,105 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<h2>Run - ?? / Leg - {{ leg.id }}</h2>
+<div id='runMap'></div>
+<div class="row">
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>start time</dt>
+            <dd>{{ leg.start_datetime }}</dd>
+        <dt>end time</dt>
+            <dd>{{ leg.end_datetime }}</dd>
+    </dl>
+  </div>
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>distance (mi)</dt>
+            <dd>{{ leg.distance_in_miles | round(2) }}</dd>
+    </dl>
+  </div>
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>avg speed (mph)</dt>
+            <dd>{{ leg.avg_speed | round(2) }}</dd>
+        <dt>max speed (mph)</dt>
+            <dd>{{ leg.max_speed | round(2) }}</dd>
+        <dt>avg pace (min / mile)</dt>
+            <dd>{{ leg.avg_pace }}</dd>
+        <dt>max pace (min / mile)</dt>
+            <dd>{{ leg.max_pace }}</dd>
+    </dl>
+  </div>
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>start lat/lng</dt>
+            <dd>{{ leg.start_position.latitude | round(5) }}, 
+                {{ leg.start_position.longitude | round(5) }}</dd>
+        <dt>end lat/lng</dt>
+            <dd>{{ leg.end_position.latitude | round(5) }}, 
+                {{ leg.end_position.longitude | round(5) }}</dd>
+    </dl>
+  </div>
+  <div class="col-2">
+    <dl class='list-group'>
+        <dt>city</dt>
+            <dd>{{ leg.run.city.name }}</dd>
+        <dt>state</dt>
+            <dd>{{ leg.run.city.state.name }}</dd>
+    </dl>
+  </div>
+<div id="accordion" class="col-12">
+    <div class="card">
+        <div class="card-header" id="headingPointCard">
+            <h5 class="mb-0">
+                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapsePointCard" aria-expanded="false" aria-controls="collapsePointCard">
+                    Points
+                </button>
+            </h5>
+        </div>
+        <div id="collapsePointCard" class="collapse show" aria-labelledby="headingPointCard" data-parent="#accordion">
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">timestamp</th>
+                            <th scope="col">latitude</th>
+                            <th scope="col">longitude</th>
+                            <th scope="col">speed (mph)</th>
+                            <th scope="col">pace (min / mile)</th>
+                            <th scope="col">elevation (ft)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for point in leg.points %}
+                            <tr>
+                                <td>{{ point.timestamp }}</td>
+                                <td>{{ point.latitude | round(5) }}</td>
+                                <td>{{ point.longitude | round(5) }}</td>
+                                <td>{{ point.speed_in_mph | round(2) }}</td>
+                                <td>{{ point.pace }}</td>
+                                <td>{{ point.elevation | round(2) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block extendedJavascript %}
+<script>
+var runMap = L.map('runMap').setView([{{ leg.centroid.latitude }},{{ leg.centroid.longitude }}] , 13);
+L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: '{{ MAPBOX_API_KEY }}'
+}).addTo(runMap);
+var latLng = [ {% for point in leg.points %}[{{ point.latitude }},{{ point.longitude }}],{% endfor %}];
+var polyline = L.polyline(latLng, {color: 'red'}).addTo(runMap);
+runMap.fitBounds(polyline.getBounds().pad(0.25));
+</script>
+{% endblock %}

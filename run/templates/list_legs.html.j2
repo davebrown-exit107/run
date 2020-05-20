@@ -1,36 +1,30 @@
 {% extends "base.html.j2" %}
 {% block content %}
     <h1>Legs</h1>
-    <table>
+    <table class='table'>
         <thead>
             <tr>
-                <th>start time</th>
-                <th>end time</th>
-                <th>distance</th>
-                <th>avg speed</th>
-                <th>max speed</th>
-                <th>start lat/lng</th>
-                <th>end lat/lng</th>
-                <th>number of points</th>
-                <th>city</th>
-                <th>state</th>
+                <th>id</th>
+                <th>date</th>
+                <th>time</th>
+                <th>distance (m)</th>
+                <th>avg speed (mph)</th>
+                <th>max speed (mph)</th>
+                <th>avg pace (min / mile)</th>
+                <th>max pace (min / mile)</th>
             </tr>
         </thead>
         <tbody>
             {% for leg in legs %}
             <tr>
-                <td>{{ leg.start_datetime }}</td>
-                <td>{{ leg.end_datetime }}</td>
-                <td>{{ leg.distance }}</td>
-                <td>still figuring out</td>
-                <td>still figuring out</td>
-                <td>{{ leg.start_position.latitude }}, 
-                    {{ leg.start_position.longitude }}</td>
-                <td>{{ leg.end_position.latitude }}, 
-                    {{ leg.end_position.longitude }}</td>
-                <td>{{ leg.points | length }}</td>
-                <td>{{ leg.run.city.name }}</td>
-                <td>{{ leg.run.city.state.name }}</td>
+                <td><a href="{{ url_for('detail_leg', leg_id=leg.id) }}">{{ leg.id }}</a></td>
+                <td>{{ leg.start_datetime.strftime('%Y-%m-%d') }}</td>
+                <td>{{ leg.start_datetime.strftime('%H:%M')}}</td>
+                <td>{{ leg.distance | round(2) }}</td>
+                <td>{{ leg.avg_speed | round(2) }}</td>
+                <td>{{ leg.max_speed | round(2) }}</td>
+                <td>{{ leg.avg_pace }}</td>
+                <td>{{ leg.max_pace }}</td>
             </tr>
             {% endfor %}
         </tbody>

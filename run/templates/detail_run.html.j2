@@ -1,5 +1,6 @@
 {% extends "base.html.j2" %}
 {% block content %}
+<h2>Run - {{ run.id }}</h2>
 <div id='runMap'></div>
 <div class="row">
   <div class="col-2">
@@ -66,6 +67,7 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th scope="col">id</th>
                             <th scope="col">start time</th>
                             <th scope="col">end time</th>
                             <th scope="col">distance</th>
@@ -81,6 +83,7 @@
                     <tbody>
                         {% for leg in run.legs %}
                         <tr>
+                            <td><a href="{{ url_for('detail_leg', leg_id=leg.id) }}">{{ leg.id }}</a></td>
                             <td>{{ leg.start_datetime }}</td>
                             <td>{{ leg.end_datetime }}</td>
                             <td>{{ leg.distance_in_miles | round(2) }}</td>
@@ -118,7 +121,7 @@
                             <th scope="col">longitude</th>
                             <th scope="col">speed (mph)</th>
                             <th scope="col">pace (min / mile)</th>
-                            <th scope="col">elevation</th>
+                            <th scope="col">elevation (ft)</th>
                         </tr>
                     </thead>
                     <tbody>

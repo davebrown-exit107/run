@@ -20,9 +20,9 @@
         <tbody>
             {% for run in runs %}
             <tr>
-              <td><a href="{{ url_for('detail_run', run_id=run.id) }}">{{ run.id }}</a></td>
+                <td><a href="{{ url_for('detail_run', run_id=run.id) }}">{{ run.id }}</a></td>
                 <td>{{ run.start_datetime.strftime('%Y-%m-%d') }}</td>
-                <td>{{ run.start_datetime .strftime('%H:%M')}}</td>
+                <td>{{ run.start_datetime.strftime('%H:%M')}}</td>
                 <td>{{ run.distance | round(2) }}</td>
                 <td>{{ run.avg_speed | round(2) }}</td>
                 <td>{{ run.max_speed | round(2) }}</td>
