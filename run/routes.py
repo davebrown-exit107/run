@@ -1,28 +1,43 @@
-from flask import request, session, abort, render_template, \
-    send_file, jsonify, json, url_for, flash, redirect
+# pylint: disable=no-member
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
 
-#from datetime import date, datetime, timedelta
-#import dateutil.parser
-#from io import BytesIO
-#from itertools import groupby
-#import tablib
-#from decimal import *
-#from sqlalchemy import desc
-#from sqlalchemy.orm import exc
-#from StringIO import StringIO
-#import xlrd
+from flask import render_template
 
 from run import db
 from run import run_app
-from run.models import Country, State, City, Run, Leg, Point
+# from run.models import Country, State, City, Run, Leg, Point
+from run.models import Run, Leg, Point
+
 
 ##################################################
 # Frontends
 ##################################################
 @run_app.route('/', methods=['GET'])
 def landing_page():
-  return 'landing_page'
+    return 'landing_page'
 
-@run_app.route('/list', methods=['GET'])
-def run_list():
-  return 'list of runs'
+
+@run_app.route('/point/list', methods=['GET'])
+def list_points():
+    points = db.session.query(Point).all()
+    return render_template('list_points.html.j2', points=points)
+
+
+@run_app.route('/run/list', methods=['GET'])
+def list_runs():
+    runs = db.session.query(Run).all()
+    return render_template('list_runs.html.j2', runs=runs)
+
+
+@run_app.route('/leg/list', methods=['GET'])
+def list_legs():
+    legs = db.session.query(Leg).all()
+    return render_template('list_legs.html.j2', legs=legs)
+
+
+@run_app.route('/run/<int:run_id>', methods=['GET'])
+def detail_run(run_id):
+    run = db.session.query(Run).get_or_404(run_id)
+    return render_template('detail_run.html.j2', run=run, MAPBOX_API_KEY=run_app.config['MAPBOX_API_KEY'])

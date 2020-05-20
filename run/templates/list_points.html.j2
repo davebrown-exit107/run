@@ -1,0 +1,32 @@
+{% extends "base.html.j2" %}
+{% block content %}
+    <h1>Points</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>timestamp</th>
+                <th>latitude</th>
+                <th>longitude</th>
+                <th>speed</th>
+                <th>elevation</th>
+                <th>distance</th>
+                <th>city</th>
+                <th>state</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for point in points %}
+            <tr>
+                <td>{{ point.timestamp }}</td>
+                <td>{{ point.latitude }}</td>
+                <td>{{ point.longitude }}</td>
+                <td>{{ point.speed }}</td>
+                <td>{{ point.elevation }}</td>
+                <td>{{ point.distance }}</td>
+                <td>{{ point.leg.run.city.name }}</td>
+                <td>{{ point.leg.run.city.state.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

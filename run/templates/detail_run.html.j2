@@ -1,0 +1,147 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<div id='runMap'></div>
+<div id="accordion">
+    <div class="card">
+        <div class="card-header" id="headingRunCard">
+            <h5 class="mb-0">
+                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseRunCard" aria-expanded="false" aria-controls="collapseRunCard">
+                    Run - {{ run.start_datetime }} - {{ run.city.name }}, {{ run.city.state.name }}
+                </button>
+            </h5>
+        </div>
+        <div id="collapseRunCard" class="collapse show" aria-labelledby="headingRunCard" data-parent="#accordion">
+            <div class="card-body">
+                <dl class='list-group'>
+                    <dt>start time</dt>
+                        <dd>{{ run.start_datetime }}</dd>
+                    <dt>end time</dt>
+                        <dd>{{ run.end_datetime }}</dd>
+                    <dt>distance</dt>
+                        <dd>{{ run.distance_in_miles }}</dd>
+                    <dt>avg speed</dt>
+                        <dd>{{ run.avg_speed }}</dd>
+                    <dt>max speed</dt>
+                        <dd>{{ run.max_speed }}</dd>
+                    <dt>avg pace</dt>
+                        <dd>{{ run.avg_pace }}</dd>
+                    <dt>max pace</dt>
+                        <dd>{{ run.max_pace }}</dd>
+                    <dt>start lat/lng</dt>
+                        <dd>{{ run.start_position.latitude }}, 
+                            {{ run.start_position.longitude }}</dd>
+                    <dt>end lat/lng</dt>
+                        <dd>{{ run.end_position.latitude }}, 
+                            {{ run.end_position.longitude }}</dd>
+                    <dt>Number of Legs</dt>
+                        <dd>{{ run.legs | length }}</dd>
+                    <dt>city</dt>
+                        <dd>{{ run.city.name }}</dd>
+                    <dt>state</dt>
+                        <dd>{{ run.city.state.name }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header" id="headingLegCard">
+            <h5 class="mb-0">
+                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseLegCard" aria-expanded="false" aria-controls="collapseLegCard">
+                    Legs
+                </button>
+            </h5>
+        </div>
+        <div id="collapseLegCard" class="collapse show" aria-labelledby="headingLegCard" data-parent="#accordion">
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">start time</th>
+                            <th scope="col">end time</th>
+                            <th scope="col">distance</th>
+                            <th scope="col">avg speed</th>
+                            <th scope="col">max speed</th>
+                            <th scope="col">avg pace</th>
+                            <th scope="col">max pace</th>
+                            <th scope="col">start lat/lng</th>
+                            <th scope="col">end lat/lng</th>
+                            <th scope="col">number of points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leg in run.legs %}
+                        <tr>
+                            <td>{{ leg.start_datetime }}</td>
+                            <td>{{ leg.end_datetime }}</td>
+                            <td>{{ leg.distance_in_miles }}</td>
+                            <td>{{ leg.avg_speed }}</td>
+                            <td>{{ leg.max_speed }}</td>
+                            <td>{{ leg.avg_pace }}</td>
+                            <td>{{ leg.max_pace }}</td>
+                            <td>{{ leg.start_position.latitude }}, 
+                                {{ leg.start_position.longitude }}</td>
+                            <td>{{ leg.end_position.latitude }}, 
+                                {{ leg.end_position.longitude }}</td>
+                            <td>{{ leg.points | length }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header" id="headingPointCard">
+            <h5 class="mb-0">
+                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapsePointCard" aria-expanded="false" aria-controls="collapsePointCard">
+                    Points
+                </button>
+            </h5>
+        </div>
+        <div id="collapsePointCard" class="collapse show" aria-labelledby="headingPointCard" data-parent="#accordion">
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">timestamp</th>
+                            <th scope="col">latitude</th>
+                            <th scope="col">longitude</th>
+                            <th scope="col">speed</th>
+                            <th scope="col">pace</th>
+                            <th scope="col">elevation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for point in run.points %}
+                            <tr>
+                                <td>{{ point.timestamp }}</td>
+                                <td>{{ point.latitude }}</td>
+                                <td>{{ point.longitude }}</td>
+                                <td>{{ point.speed_in_mph }}</td>
+                                <td>{{ point.pace }}</td>
+                                <td>{{ point.elevation }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block extendedJavascript %}
+<script>
+var runMap = L.map('runMap').setView([{{ run.centroid.latitude }},{{ run.centroid.longitude }}] , 13);
+L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: '{{ MAPBOX_API_KEY }}'
+}).addTo(runMap);
+var latLng = [ {% for point in run.points %}[{{ point.latitude }},{{ point.longitude }}],{% endfor %}];
+var polyline = L.polyline(latLng, {color: 'red'}).addTo(runMap);
+runMap.fitBounds(polyline.getBounds().pad(0.25));
+</script>
+{% endblock %}

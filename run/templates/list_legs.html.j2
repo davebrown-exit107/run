@@ -1,0 +1,38 @@
+{% extends "base.html.j2" %}
+{% block content %}
+    <h1>Legs</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>start time</th>
+                <th>end time</th>
+                <th>distance</th>
+                <th>avg speed</th>
+                <th>max speed</th>
+                <th>start lat/lng</th>
+                <th>end lat/lng</th>
+                <th>number of points</th>
+                <th>city</th>
+                <th>state</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for leg in legs %}
+            <tr>
+                <td>{{ leg.start_datetime }}</td>
+                <td>{{ leg.end_datetime }}</td>
+                <td>{{ leg.distance }}</td>
+                <td>still figuring out</td>
+                <td>still figuring out</td>
+                <td>{{ leg.start_position.latitude }}, 
+                    {{ leg.start_position.longitude }}</td>
+                <td>{{ leg.end_position.latitude }}, 
+                    {{ leg.end_position.longitude }}</td>
+                <td>{{ leg.points | length }}</td>
+                <td>{{ leg.run.city.name }}</td>
+                <td>{{ leg.run.city.state.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

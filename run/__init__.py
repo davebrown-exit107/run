@@ -1,21 +1,31 @@
+# pylint: disable=wrong-import-position
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+
 from flask import Flask
-#from path import Path
-import os
+from flask_sqlalchemy import SQLAlchemy
+from pint import UnitRegistry
+
+
+##################################################
+# Setup unit conversions for the application
+##################################################
+ureg = UnitRegistry()
+Q_ = ureg.Quantity
 
 ##################################################
 # Initialze and Configure Application
 ##################################################
 run_app = Flask(__name__)
-#run_app.config.from_envvar('RUN_APP_CONFIG')
 run_app.config.from_pyfile('config/run_app.conf')
 
 ##################################################
 # SQLAlchemy setup
 ##################################################
-from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy(run_app)
 
 ##################################################
-# Routes
+# Import routes
 ##################################################
 from run import routes

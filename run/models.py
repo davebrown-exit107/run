@@ -1,8 +1,13 @@
-from sqlalchemy.orm import column_property
-from sqlalchemy import select, func
+# pylint: disable=no-member
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+
+from sqlalchemy import func
 
 from run import db
-from run.lib import *
+from run.lib import timestamp_to_datetime
+from run import ureg, Q_
 
 class Point(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -25,15 +30,32 @@ class Point(db.Model):
     leg_id = db.Column(db.Integer, db.ForeignKey('leg.id'))
     leg = db.relationship('Leg', backref=db.backref('points'))
 
-#    run_id = db.Column(db.Integer, db.ForeignKey('run.id'))
-#    run = db.relationship('Run', backref=db.backref('points'))
+    run_id = db.Column(db.Integer, db.ForeignKey('run.id'))
+    run = db.relationship('Run', backref=db.backref('points'))
 
-#    speed_mph = lambda x: round(x*2.236936,2)
-#    dist_miles = lambda x: round(x*0.00062137,2)
-#    elevation_feet = lambda x: round(x*3.281)
+    @property
+    def pace(self):
+        speed = Q_(self.speed, ureg.kilometer_per_hour)
+        pace = 60 / speed.to(ureg.mile_per_hour).magnitude
+        return f"{round(pace):02}:{round((pace % 1) * 60):02}"
 
-    def __init__(self, timestamp, elevation, latitude, 
-                  longitude, distance, speed, leg):
+    @property
+    def speed_in_mph(self):
+        speed = Q_(self.speed, ureg.kilometer_per_hour)
+        return speed.to(ureg.mile_per_hour).magnitude
+
+    @property
+    def distance_in_miles(self):
+        distance = Q_(self.distance, ureg.meter)
+        return distance.to(ureg.mile).magnitude
+
+    @property
+    def elevation_in_feet(self):
+        elevation = Q_(self.elevation, ureg.meter)
+        return elevation.to(ureg.foot).magnitude
+
+    def __init__(self, timestamp, elevation, latitude,
+                 longitude, distance, speed, leg, run):
         # Convert to datetime
         self.timestamp = timestamp_to_datetime(timestamp)
         self.elevation = elevation
@@ -47,27 +69,77 @@ class Point(db.Model):
 #        self.wind_bearing = wind_bearing
 #        self.wind_speed = wind_speed
         self.leg = leg
-#        self.run = run
+        self.run = run
 
 
 class Leg(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    avg_speed = db.Column(db.Numeric(scale=3))
-    max_speed = db.Column(db.Numeric(scale=3))
-
-    start_position_lat = db.Column(db.Float)
-    start_position_long = db.Column(db.Float)
-    end_position_lat = db.Column(db.Float)
-    end_position_long = db.Column(db.Float)
 
     # Dynamic Properties
 #    total_ascent = db.Column(db.Numeric(scale=1))
 #    total_descent = db.Column(db.Numeric(scale=1))
-#    total_distance = db.Column(db.Numeric(scale=2))
 
-#    timestamp = db.Column(db.String)
-    start_datetime = db.Column(db.DateTime)
-    end_datetime = db.Column(db.DateTime)
+    @property
+    def centroid(self):
+        latitude = db.session.query(func.avg(Point.latitude)).filter(Point.run_id == self.id).scalar()
+        longitude = db.session.query(func.avg(Point.longitude)).filter(Point.run_id == self.id).scalar()
+        print(latitude)
+        print(longitude)
+        return {
+                'latitude': latitude,
+                'longitude': longitude
+        }
+
+    @property
+    def avg_pace(self):
+        avg_speed = db.session.query(func.avg(Point.speed)).filter(Point.leg_id == self.id).scalar()
+        pace = 60 / Q_(avg_speed, ureg.kilometer_per_hour).to(ureg.mile_per_hour).magnitude
+        return f"{round(pace):02}:{round((pace % 1) * 60):02}"
+
+    @property
+    def max_pace(self):
+        avg_speed = db.session.query(func.max(Point.speed)).filter(Point.leg_id == self.id).scalar()
+        pace = 60 / Q_(avg_speed, ureg.kilometer_per_hour).to(ureg.mile_per_hour).magnitude
+        return f"{round(pace):02}:{round((pace % 1) * 60):02}"
+
+    @property
+    def avg_speed(self):
+        return db.session.query(func.avg(Point.speed)).filter(Point.leg_id == self.id).scalar()
+
+    @property
+    def max_speed(self):
+        return db.session.query(func.max(Point.speed)).filter(Point.leg_id == self.id).scalar()
+
+    @property
+    def start_datetime(self):
+        return self.points[0].timestamp
+
+    @property
+    def end_datetime(self):
+        return self.points[-1].timestamp
+
+    @property
+    def distance(self):
+        return self.points[-1].distance - self.points[0].distance
+
+    @property
+    def distance_in_miles(self):
+        distance = Q_(self.distance, ureg.meter)
+        return distance.to(ureg.mile).magnitude
+
+    @property
+    def start_position(self):
+        return {
+            'longitude': self.points[0].longitude,
+            'latitude': self.points[0].latitude
+        }
+
+    @property
+    def end_position(self):
+        return {
+            'longitude': self.points[-1].longitude,
+            'latitude': self.points[-1].latitude
+        }
 
     total_timer_time = db.Column(db.Numeric(scale=2))
     total_elapsed_time = db.Column(db.Numeric(scale=2))
@@ -75,91 +147,89 @@ class Leg(db.Model):
     run_id = db.Column(db.Integer, db.ForeignKey('run.id'))
     run = db.relationship('Run', backref=db.backref('legs'))
 
-
-    def __init__(self, start_position_lat, start_position_long, 
-                end_position_lat, end_position_long, start_datetime,
-                end_datetime, total_timer_time, total_elapsed_time, run):
-        #self.avg_speed = avg_speed
-        #self.max_speed = max_speed
-        self.start_position_lat = start_position_lat
-        self.start_position_lng = start_position_lng
-        self.end_position_lat = end_position_lat
-        self.end_position_lng = end_position_lng
-        #self.total_ascent = total_ascent
-        #self.total_descent = total_descent
-        #self.total_distance = total_distance
-        self.start_datetime = pendulum.instance(start_datetime)
-        self.end_datetime = pendulum.instance(end_datetime)
-        self.total_timer_time = total_timer_time
-        self.total_elapsed_time = total_elapsed_time
+    def __init__(self, run):
         self.run = run
 
 
 class Run(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-#    avg_speed = db.Column(db.Numeric(scale=3))
-#    max_speed = db.Column(db.Numeric(scale=3))
-
-    start_position_lat = db.Column(db.Float)
-    start_position_long = db.Column(db.Float)
-    end_position_lat = db.Column(db.Float)
-    end_position_long = db.Column(db.Float)
-#    total_ascent = db.Column(db.Numeric(scale=1))
-#    total_descent = db.Column(db.Numeric(scale=1))
-#    total_distance = db.Column(db.Numeric(scale=2))
 
     start_time = db.Column(db.DateTime)
     total_timer_time = db.Column(db.Numeric(scale=2))
     total_elapsed_time = db.Column(db.Numeric(scale=2))
 
-#    race_overall_place = db.Column(db.String)
-#    race_age_group = db.Column(db.String)
-#    race_age_group_place = db.Column(db.String)
-#    race_chip_time = db.Column(db.Numeric)
+    # Dynamic Properties
+#    total_ascent = db.Column(db.Numeric(scale=1))
+#    total_descent = db.Column(db.Numeric(scale=1))
+
+    @property
+    def centroid(self):
+        latitude = db.session.query(func.avg(Point.latitude)).filter(Point.run_id == self.id).scalar()
+        longitude = db.session.query(func.avg(Point.longitude)).filter(Point.run_id == self.id).scalar()
+        print(latitude)
+        print(longitude)
+        return {
+                'latitude': latitude,
+                'longitude': longitude
+        }
+
+    @property
+    def avg_pace(self):
+        avg_speed = db.session.query(func.avg(Point.speed)).filter(Point.run_id == self.id).scalar()
+        pace = 60 / Q_(avg_speed, ureg.kilometer_per_hour).to(ureg.mile_per_hour).magnitude
+        return f"{round(pace):02}:{round((pace % 1) * 60):02}"
+
+    @property
+    def max_pace(self):
+        avg_speed = db.session.query(func.max(Point.speed)).filter(Point.run_id == self.id).scalar()
+        pace = 60 / Q_(avg_speed, ureg.kilometer_per_hour).to(ureg.mile_per_hour).magnitude
+        return f"{round(pace):02}:{round((pace % 1) * 60):02}"
+
+    @property
+    def avg_speed(self):
+        return db.session.query(func.avg(Point.speed)).filter(Point.run_id == self.id).scalar()
+
+    @property
+    def max_speed(self):
+        return db.session.query(func.max(Point.speed)).filter(Point.run_id == self.id).scalar()
+
+    @property
+    def start_position(self):
+        return {
+            'longitude': self.points[0].longitude,
+            'latitude': self.points[0].latitude
+        }
+
+    @property
+    def end_position(self):
+        return {
+            'longitude': self.points[-1].longitude,
+            'latitude': self.points[-1].latitude
+        }
+
+    @property
+    def start_datetime(self):
+        return self.points[0].timestamp
+
+    @property
+    def end_datetime(self):
+        return self.points[-1].timestamp
+
+    @property
+    def distance(self):
+        return self.points[-1].distance
+
+    @property
+    def distance_in_miles(self):
+        distance = Q_(self.distance, ureg.meter)
+        return distance.to(ureg.mile).magnitude
 
     city_id = db.Column(db.Integer, db.ForeignKey('city.id'))
     city = db.relationship('City', backref=db.backref('runs'))
-#    state_id = db.Column(db.Integer, db.ForeignKey('state.id'))
-#    state = db.relationship('State', backref=db.backref('runs'))
-#    country_id = db.Column(db.Integer, db.ForeignKey('country.id'))
-#    country = db.relationship('Country', backref=db.backref('runs'))
-#    timezone_id = db.Column(db.Integer, db.ForeignKey('timezone.id'))
-#    timezone = db.relationship('Timezone', backref=db.backref('runs'))
-#    race_id = db.Column(db.Integer, db.ForeignKey('race.id'))
-#    race = db.relationship('Race', backref=db.backref('runs'))
 
-    def __init__(self, start_position_lat, start_position_long,
-                  end_position_lat, end_position_long, start_time,
-                  total_timer_time, total_elapsed_time, city):
-        self.start_position_lat = start_position_lat
-        self.start_position_lng = start_position_lng
-        self.end_position_lat = end_position_lat
-        self.end_position_lng = end_position_lng
-        #self.total_ascent = total_ascent
-        #self.total_descent = total_descent
-        #self.total_distance = total_distance
-        self.start_time = timestamp_to_datetime(start_time)
-        self.total_timer_time = total_timer_time
-        self.total_elapsed_time = total_elapsed_time
-        #self.day = day
+    def __init__(self, city):
         self.city = city
-        #self.state = state
-        #self.country = country
-        #self.timezone = timezone
 
-
-#class Day(db.Model):
-#    id = db.Column(db.Integer, primary_key=True)
-#    sunrise = db.Column(db.DateTime)
-#    sunset = db.Column(db.DateTime)
-#    date = db.Column(db.Date)
-#
-#    def __init__(self, date):
-#        self.date = date
-#
-# I feel like city should have a mapping to state which should have a mapping to country
-# this way we could only need to specify a city in the run and everything else would be
-# taken care of. This would also make relationships a bit easier.
 
 class City(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -168,8 +238,10 @@ class City(db.Model):
     state_id = db.Column(db.Integer, db.ForeignKey('state.id'))
     state = db.relationship('State', backref=db.backref('cities'))
 
-    def __init__(self, name):
+    def __init__(self, name, state):
         self.name = name
+        self.state = state
+
 
 class State(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -178,8 +250,10 @@ class State(db.Model):
     country_id = db.Column(db.Integer, db.ForeignKey('country.id'))
     country = db.relationship('Country', backref=db.backref('states'))
 
-    def __init__(self, name):
+    def __init__(self, name, country):
         self.name = name
+        self.country = country
+
 
 class Country(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -187,28 +261,3 @@ class Country(db.Model):
 
     def __init__(self, name):
         self.name = name
-
-#class Timezone(db.Model):
-#    id = db.Column(db.Integer, primary_key=True)
-#    name = db.Column(db.String)
-#
-#    def __init__(self, name):
-#        self.name = name
-#
-#class Race(db.Model):
-#    id = db.Column(db.Integer, primary_key=True)
-#    name = db.Column(db.String, unique=True)
-#
-##    city_id = db.Column(db.Integer, db.ForeignKey('city.id'))
-##    city = db.relationship('City', backref=db.backref('runs'))
-##    state_id = db.Column(db.Integer, db.ForeignKey('state.id'))
-##    state = db.relationship('State', backref=db.backref('runs'))
-##    country_id = db.Column(db.Integer, db.ForeignKey('country.id'))
-##    country = db.relationship('Country', backref=db.backref('runs'))
-#
-#    #def __init__(self, name, city, state, country):
-#    def __init__(self, name):
-#        self.name = name
-##        self.city = city
-##        self.state = state
-##        self.country = country
