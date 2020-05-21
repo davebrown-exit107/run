@@ -5,6 +5,7 @@
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from pint import UnitRegistry
 
 
@@ -25,6 +26,7 @@ run_app.config.from_pyfile('config/run_app.conf')
 ##################################################
 db = SQLAlchemy(run_app)
 
+migrate = Migrate(run_app, db)
 ##################################################
 # Import routes
 ##################################################
