@@ -3,14 +3,14 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-class-docstring
 
-from datetime import date, datetime
+from datetime import datetime
 
 from flask_login import UserMixin
+import pendulum
 from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from run import db, ureg, Q_, login_manager
-from run.lib import timestamp_to_datetime
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -84,11 +84,16 @@ class Point(db.Model):
         elevation = Q_(self.elevation, ureg.meter)
         return elevation.to(ureg.foot).magnitude
 
+    def timestamp_to_datetime(self, timestamp):
+        '''Convert a string to a datetime instance'''
+        utc_time = pendulum.instance(timestamp)
+        return utc_time
+
     #TODO: Move lat long into one var: coords
     def __init__(self, timestamp, elevation, latitude,
                  longitude, distance, speed, leg, run):
         # Convert to datetime
-        self.timestamp = timestamp_to_datetime(timestamp)
+        self.timestamp = self.timestamp_to_datetime(timestamp)
         self.elevation = elevation
         self.latitude = latitude
         self.longitude = longitude

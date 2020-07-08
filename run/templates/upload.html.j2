@@ -1,0 +1,26 @@
+{% extends "base.html.j2" %}
+{% block content %}
+  <div class="form-wrapper">
+    {% for message in get_flashed_messages() %}
+      <div class="alert alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ message }}
+      </div>
+    {% endfor %}
+
+    <h1>Log In</h1>
+
+    <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Select .fit file</label>
+        <div class="custom-file">
+          <input type="file" class="custom-file-input" name="fit_file" id="fit_file">
+          <label class="custom-file-label" for="fit_file">Select .fit file...</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Upload</button>
+
+    </form>
+  </div>
+{% endblock %}

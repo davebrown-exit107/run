@@ -23,6 +23,9 @@ Q_ = ureg.Quantity
 run_app = Flask(__name__)
 run_app.config.from_pyfile('../config/run_app.conf')
 
+UPLOAD_FOLDER = 'uploads/'
+ALLOWED_EXTENSIONS = {'fit'}
+
 ##################################################
 # SQLAlchemy setup
 ##################################################

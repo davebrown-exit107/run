@@ -3,28 +3,30 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-class-docstring
 
+##########################################
+# 3rd party modules
+###########################################
 from flask import request, render_template, redirect, url_for, flash
+from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 
-from flask_login import current_user, login_user, logout_user, login_required
-
-from icecream import ic
-
+###########################################
+# import application components
+############################################
 from run import db
 from run import run_app
-# from run.models import Country, State, City, Run, Leg, Point
-from run.forms import SignupForm, LoginForm, ProfileForm
-from run.models import User, Run, Leg, Point
-
+from run.forms import LoginForm
+from run.lib import parse_file
+from run.models import Leg, Point, Run, User
 
 ##################################################
 # Landing Page
 ##################################################
 @run_app.route('/', methods=['GET'])
-def index():
-    # This should be the product page unless you're logged in,
-    # then it's a redirect to your dashboard
-    return redirect(url_for('list_runs'))
+def dashboard():
+    if current_user.is_authenticated:
+        return render_template('dashboard.html.j2', current_user=current_user)
+    return redirect(url_for('login'))
 
 ##################################################
 # Auth/User
@@ -36,27 +38,24 @@ def profile():
 @run_app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            ic('bad username or password')
             flash('Invalid username or password')
             return redirect(url_for('login'))
-        ic('logging user in')
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
-        ic(next_page)
+            next_page = url_for('dashboard')
         return redirect(next_page)
     return render_template('login.html.j2', title='Sign In', form=form)
 
 @run_app.route('/logout', methods=['GET'])
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 @run_app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -76,7 +75,6 @@ def list_points():
 @run_app.route('/run/', methods=['GET'])
 @login_required
 def list_runs():
-    #runs = db.session.query(User).all()
     runs = current_user.runs
     return render_template('list_runs.html.j2', runs=runs)
 
@@ -103,3 +101,28 @@ def detail_run(run_id):
     return render_template('detail_run.html.j2',
                            run=run,
                            MAPBOX_API_KEY=run_app.config['MAPBOX_API_KEY'])
+
+##################################################
+# Backends
+##################################################
+@run_app.route('/upload/', methods=['GET', 'POST'])
+@login_required
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'fit_file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+
+        fit_file = request.files['fit_file']
+
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if fit_file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+
+        if fit_file:
+            run_id = parse_file(db, fit_file.stream, current_user)
+            return redirect(url_for('detail_run', run_id=run_id))
+    return render_template('upload.html.j2')
