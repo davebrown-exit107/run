@@ -1,6 +1,6 @@
-*.db
+db
 uploads
-run/config/*.conf
+config/*.conf
 __pycache__
 sample_data/*
 .vscode
