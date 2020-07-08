@@ -3,11 +3,41 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-class-docstring
 
-from sqlalchemy import func
+from datetime import date, datetime
 
-from run import db
+from flask_login import UserMixin
+from sqlalchemy import func
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from run import db, ureg, Q_, login_manager
 from run.lib import timestamp_to_datetime
-from run import ureg, Q_
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    username = db.Column(db.String, index=True, unique=True)
+    email = db.Column(db.String, index=True, unique=True)
+    password_hash = db.Column(db.String)
+    created_on = db.Column(db.DateTime)
+    last_login = db.Column(db.DateTime)
+
+    def set_password(self, password):
+        """Create hashed password."""
+        self.password_hash = generate_password_hash(password, method='sha256')
+
+    def check_password(self, password):
+        """Check hashed password."""
+        return check_password_hash(self.password_hash, password)
+
+    def __init__(self, username, email):
+        self.username = username
+        self.email = email
+        self.created_on = datetime.now()
+        self.last_login = datetime.now()
+
+    def __repr__(self):
+        return '<User {}>'.format(self.username)
+
 
 class Point(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,6 +84,7 @@ class Point(db.Model):
         elevation = Q_(self.elevation, ureg.meter)
         return elevation.to(ureg.foot).magnitude
 
+    #TODO: Move lat long into one var: coords
     def __init__(self, timestamp, elevation, latitude,
                  longitude, distance, speed, leg, run):
         # Convert to datetime
@@ -84,8 +115,8 @@ class Leg(db.Model):
         latitude = db.session.query(func.avg(Point.latitude)).filter(Point.run_id == self.id).scalar()
         longitude = db.session.query(func.avg(Point.longitude)).filter(Point.run_id == self.id).scalar()
         return {
-                'latitude': latitude,
-                'longitude': longitude
+            'latitude': latitude,
+            'longitude': longitude
         }
 
     @property
@@ -167,8 +198,8 @@ class Run(db.Model):
         print(latitude)
         print(longitude)
         return {
-                'latitude': latitude,
-                'longitude': longitude
+            'latitude': latitude,
+            'longitude': longitude
         }
 
     @property
@@ -222,11 +253,15 @@ class Run(db.Model):
         distance = Q_(self.distance, ureg.meter)
         return distance.to(ureg.mile).magnitude
 
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref=db.backref('runs'))
+
     city_id = db.Column(db.Integer, db.ForeignKey('city.id'))
     city = db.relationship('City', backref=db.backref('runs'))
 
-    def __init__(self, city):
+    def __init__(self, city, user):
         self.city = city
+        self.user = user
 
 
 class City(db.Model):
@@ -259,3 +294,9 @@ class Country(db.Model):
 
     def __init__(self, name):
         self.name = name
+
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+

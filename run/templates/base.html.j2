@@ -27,17 +27,22 @@
         <!-- Begin top navbar -->
         <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
             <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Run!</a>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            </div>
-            <ul class="navbar-nav px-3">
-                <li class="nav-item text-nowrap">
-                    <a class="nav-link" href="#">Sign out</a>
+            <ul class="navbar-nav">
+                {% if current_user.is_anonymous %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">Log in</a>
                 </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Log out</a>
+                </li>
+                {% endif %}
             </ul>
         </nav>
         <!-- End top navbar -->
 
         <div class="container-fluid"> <!-- begin main container -->
+          {% block container %}
         <div class="row"> <!-- begin main row -->
 
             <!-- Begin sidebar -->
@@ -124,6 +129,7 @@
         </main>
 
           </div> <!-- end main row -->
+          {% endblock %}
         </div> <!-- end main container -->
         <!-- Begin Bootstrap includes -->
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>

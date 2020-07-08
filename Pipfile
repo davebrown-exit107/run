@@ -11,6 +11,8 @@ pylint-flask = "*"
 pylint-sqlalchemy = "*"
 pylint-requests = "*"
 pylint-flask-sqlalchemy = "*"
+flask-shell-ipython = "*"
+icecream = "*"
 
 [packages]
 alembic = "*"
